@@ -85,6 +85,59 @@ function Settings() {
       </section>
 
       <section className="mt-6 rounded-2xl border bg-card p-6 shadow-elegant">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="font-display text-lg font-medium">Affirmation style</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Choose the tone of your daily affirmations. Soft themes default to{" "}
+              <span className="font-medium text-foreground">Reflective</span>; bold themes default to{" "}
+              <span className="font-medium text-foreground">Action</span>.
+            </p>
+          </div>
+          {isOverridden && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={resetToThemeDefault}
+              className="gap-2 text-xs"
+            >
+              <RotateCcw className="h-3.5 w-3.5" /> Use theme default ({themeDefault})
+            </Button>
+          )}
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <StyleCard
+            id="reflective"
+            label="Reflective"
+            description="Gentle, inward, calming."
+            example="“I trust the quiet space I’m creating.”"
+            active={style === "reflective"}
+            isDefault={themeDefault === "reflective"}
+            onClick={() => setStyle("reflective")}
+          />
+          <StyleCard
+            id="action"
+            label="Action"
+            description="Direct, decisive, energising."
+            example="“I do the work whether I feel like it or not.”"
+            active={style === "action"}
+            isDefault={themeDefault === "action"}
+            onClick={() => setStyle("action")}
+          />
+        </div>
+
+        <div className="mt-5 rounded-xl border bg-brand-soft p-4">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+            Today’s affirmation preview
+          </p>
+          <p className="mt-1 font-display text-base leading-snug text-balance">
+            “{previewAffirmation}”
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-6 rounded-2xl border bg-card p-6 shadow-elegant">
         <h2 className="font-display text-lg font-medium">About</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           AISION 2026 Digital Planner — Powered by{" "}
