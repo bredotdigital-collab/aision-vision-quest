@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/aision/PageHeader";
 import { THEMES, useTheme } from "@/lib/theme";
-import { Check } from "lucide-react";
+import { Check, RotateCcw } from "lucide-react";
 import { useLocalState } from "@/lib/storage";
 import { Input } from "@/components/ui/input";
+import { useAffirmationStyle, defaultStyleForTheme } from "@/lib/affirmation";
+import { getDailyAffirmation } from "@/lib/months";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_app/settings")({
   head: () => ({
@@ -18,6 +21,9 @@ export const Route = createFileRoute("/_app/settings")({
 function Settings() {
   const { theme, setTheme } = useTheme();
   const [name, setName] = useLocalState("aision:settings:name", "");
+  const { style, setStyle, resetToThemeDefault, isOverridden } = useAffirmationStyle(theme);
+  const previewAffirmation = getDailyAffirmation(style);
+  const themeDefault = defaultStyleForTheme(theme);
 
   return (
     <>
