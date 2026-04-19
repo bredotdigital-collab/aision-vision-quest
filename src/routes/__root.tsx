@@ -44,6 +44,12 @@ export const Route = createRootRoute({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "AISION · 2026 Digital Planner" },
+      { name: "description", content: "AISION Flow is a premium digital 2026 planner web app designed for focus, growth, and consistency." },
+      { property: "og:description", content: "AISION Flow is a premium digital 2026 planner web app designed for focus, growth, and consistency." },
+      { name: "twitter:description", content: "AISION Flow is a premium digital 2026 planner web app designed for focus, growth, and consistency." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ecc275e8-d826-4c88-b299-1c5992fc7b62/id-preview-d094cb59--a0575da7-23f4-455b-9f9a-11081c314871.lovable.app-1776571681681.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ecc275e8-d826-4c88-b299-1c5992fc7b62/id-preview-d094cb59--a0575da7-23f4-455b-9f9a-11081c314871.lovable.app-1776571681681.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
