@@ -9,38 +9,141 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppYearRouteImport } from './routes/_app.year'
+import { Route as AppWeeklyRouteImport } from './routes/_app.weekly'
+import { Route as AppTrackingRouteImport } from './routes/_app.tracking'
+import { Route as AppSettingsRouteImport } from './routes/_app.settings'
+import { Route as AppMonthlyRouteImport } from './routes/_app.monthly'
+import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppDailyRouteImport } from './routes/_app.daily'
 
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppYearRoute = AppYearRouteImport.update({
+  id: '/year',
+  path: '/year',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppWeeklyRoute = AppWeeklyRouteImport.update({
+  id: '/weekly',
+  path: '/weekly',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTrackingRoute = AppTrackingRouteImport.update({
+  id: '/tracking',
+  path: '/tracking',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMonthlyRoute = AppMonthlyRouteImport.update({
+  id: '/monthly',
+  path: '/monthly',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDailyRoute = AppDailyRouteImport.update({
+  id: '/daily',
+  path: '/daily',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/daily': typeof AppDailyRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/monthly': typeof AppMonthlyRoute
+  '/settings': typeof AppSettingsRoute
+  '/tracking': typeof AppTrackingRoute
+  '/weekly': typeof AppWeeklyRoute
+  '/year': typeof AppYearRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/daily': typeof AppDailyRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/monthly': typeof AppMonthlyRoute
+  '/settings': typeof AppSettingsRoute
+  '/tracking': typeof AppTrackingRoute
+  '/weekly': typeof AppWeeklyRoute
+  '/year': typeof AppYearRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_app/daily': typeof AppDailyRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/monthly': typeof AppMonthlyRoute
+  '/_app/settings': typeof AppSettingsRoute
+  '/_app/tracking': typeof AppTrackingRoute
+  '/_app/weekly': typeof AppWeeklyRoute
+  '/_app/year': typeof AppYearRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/daily'
+    | '/dashboard'
+    | '/monthly'
+    | '/settings'
+    | '/tracking'
+    | '/weekly'
+    | '/year'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/daily'
+    | '/dashboard'
+    | '/monthly'
+    | '/settings'
+    | '/tracking'
+    | '/weekly'
+    | '/year'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/_app/daily'
+    | '/_app/dashboard'
+    | '/_app/monthly'
+    | '/_app/settings'
+    | '/_app/tracking'
+    | '/_app/weekly'
+    | '/_app/year'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,21 +151,84 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/year': {
+      id: '/_app/year'
+      path: '/year'
+      fullPath: '/year'
+      preLoaderRoute: typeof AppYearRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/weekly': {
+      id: '/_app/weekly'
+      path: '/weekly'
+      fullPath: '/weekly'
+      preLoaderRoute: typeof AppWeeklyRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/tracking': {
+      id: '/_app/tracking'
+      path: '/tracking'
+      fullPath: '/tracking'
+      preLoaderRoute: typeof AppTrackingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/monthly': {
+      id: '/_app/monthly'
+      path: '/monthly'
+      fullPath: '/monthly'
+      preLoaderRoute: typeof AppMonthlyRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/daily': {
+      id: '/_app/daily'
+      path: '/daily'
+      fullPath: '/daily'
+      preLoaderRoute: typeof AppDailyRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppDailyRoute: typeof AppDailyRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppMonthlyRoute: typeof AppMonthlyRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppTrackingRoute: typeof AppTrackingRoute
+  AppWeeklyRoute: typeof AppWeeklyRoute
+  AppYearRoute: typeof AppYearRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppDailyRoute: AppDailyRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppMonthlyRoute: AppMonthlyRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppTrackingRoute: AppTrackingRoute,
+  AppWeeklyRoute: AppWeeklyRoute,
+  AppYearRoute: AppYearRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
