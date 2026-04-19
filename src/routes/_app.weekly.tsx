@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLocalState } from "@/lib/storage";
+import { MonthThemeBanner } from "@/components/aision/MonthThemeBanner";
+import { getMonth } from "@/lib/months";
 
 export const Route = createFileRoute("/_app/weekly")({
   head: () => ({
