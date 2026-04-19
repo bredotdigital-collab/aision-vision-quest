@@ -6,6 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Droplet, Footprints, Heart, Sparkles, Plus, X } from "lucide-react";
+import { MonthThemeBanner } from "@/components/aision/MonthThemeBanner";
+import { getDailyAffirmation, getMonth } from "@/lib/months";
+import { useAffirmationStyle } from "@/lib/affirmation";
+import { useTheme } from "@/lib/theme";
 
 export const Route = createFileRoute("/_app/daily")({
   head: () => ({
@@ -24,13 +28,6 @@ const HABITS = [
   { id: "movement", label: "Movement", icon: Footprints },
 ];
 const MOODS = ["😔", "😐", "🙂", "😊", "✨"];
-const AFFIRMATIONS = [
-  "I do calm, focused work — and I trust the system I’ve built.",
-  "Today, small consistent steps create the future I want.",
-  "I move with intention, not urgency.",
-  "Discipline is a form of self-respect.",
-  "I am the architect of my day.",
-];
 
 function todayKey() {
   const d = new Date();
@@ -69,7 +66,10 @@ function Daily() {
     day: "numeric",
     year: "numeric",
   });
-  const affirmation = AFFIRMATIONS[today.getDate() % AFFIRMATIONS.length];
+  const { theme } = useTheme();
+  const { style } = useAffirmationStyle(theme);
+  const affirmation = getDailyAffirmation(style, today);
+  const month = getMonth(today);
 
   const addTask = () => {
     const t = taskDraft.trim();
@@ -80,15 +80,9 @@ function Daily() {
 
   return (
     <>
-      <PageHeader eyebrow="Today" title={dateLabel} />
+      <PageHeader eyebrow={`${month.name} · ${month.theme}`} title={dateLabel} />
 
-      {/* Affirmation */}
-      <section className="mb-6 rounded-2xl border bg-hero p-6 shadow-elegant">
-        <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          Daily affirmation
-        </p>
-        <p className="mt-2 font-display text-2xl leading-snug text-balance">{affirmation}</p>
-      </section>
+      <MonthThemeBanner date={today} affirmation={affirmation} />
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* LEFT — priorities + schedule */}

@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/aision/PageHeader";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocalState } from "@/lib/storage";
+import { Input } from "@/components/ui/input";
+import { getMonth } from "@/lib/months";
 
 export const Route = createFileRoute("/_app/monthly")({
   head: () => ({
@@ -14,14 +15,6 @@ export const Route = createFileRoute("/_app/monthly")({
   component: Monthly,
 });
 
-const TIPS = [
-  "Plan tomorrow tonight — momentum starts the night before.",
-  "Single-task in 50-minute focus blocks; rest in 10.",
-  "If a task takes under two minutes, do it now.",
-  "Your environment is your operating system. Tidy it weekly.",
-  "Done > perfect. Ship a draft, then refine.",
-];
-
 function monthKey() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -29,40 +22,52 @@ function monthKey() {
 
 function Monthly() {
   const key = monthKey();
+  const month = getMonth();
   const monthName = new Date().toLocaleDateString(undefined, { month: "long", year: "numeric" });
-  const [theme, setTheme] = useLocalState(`aision:monthly:${key}:theme`, "");
-  const [focus, setFocus] = useLocalState(`aision:monthly:${key}:focus`, "");
-  const [goals, setGoals] = useLocalState<string[]>(`aision:monthly:${key}:goals`, ["", "", "", ""]);
-  const [reflection, setReflection] = useLocalState(`aision:monthly:${key}:reflection`, "");
 
-  const seed = new Date().getMonth();
-  const tip1 = TIPS[seed % TIPS.length];
-  const tip2 = TIPS[(seed + 2) % TIPS.length];
+  const [goals, setGoals] = useLocalState<string[]>(`aision:monthly:${key}:goals`, [
+    "",
+    "",
+    "",
+    "",
+  ]);
+  const [reflection, setReflection] = useLocalState(`aision:monthly:${key}:reflection`, "");
+  const [promptA, setPromptA] = useLocalState(`aision:monthly:${key}:promptA`, "");
+  const [promptB, setPromptB] = useLocalState(`aision:monthly:${key}:promptB`, "");
 
   return (
     <>
-      <PageHeader eyebrow="This month" title={monthName} />
+      <PageHeader
+        eyebrow={`${month.name} · ${month.theme}`}
+        title={monthName}
+        description="Your guided month at a glance."
+      />
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card title="Monthly theme" eyebrow="One word or phrase">
+      {/* Theme + focus header */}
+      <section className="mb-6 grid gap-4 lg:grid-cols-3">
+        <div className="rounded-2xl border bg-hero p-6 shadow-elegant lg:col-span-2">
+          <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+            Theme of the month
+          </p>
+          <h2 className="mt-1 font-display text-3xl font-semibold">{month.theme}</h2>
+          <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">Focus · </span>
+            {month.focus}
+          </p>
+        </div>
+        <div className="rounded-2xl border bg-card p-6 shadow-elegant">
+          <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+            Personal intention
+          </p>
           <Input
-            value={theme}
-            onChange={(e) => setTheme(e.target.value)}
-            placeholder="e.g. Quiet mastery"
-            className="text-lg"
+            defaultValue=""
+            placeholder="Add your own word for the month…"
+            className="mt-2 border-0 bg-transparent text-lg shadow-none focus-visible:ring-1"
           />
-        </Card>
-        <Card title="Monthly focus" eyebrow="The one thing">
-          <Input
-            value={focus}
-            onChange={(e) => setFocus(e.target.value)}
-            placeholder="What deserves your full attention?"
-            className="text-lg"
-          />
-        </Card>
-      </div>
+        </div>
+      </section>
 
-      <Card title="Monthly goals" className="mt-6">
+      <Card title="Monthly goals">
         <div className="grid gap-3 sm:grid-cols-2">
           {goals.map((g, i) => (
             <Input
@@ -81,20 +86,44 @@ function Monthly() {
         </div>
       </Card>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        <Card title="Monthly reflection" className="lg:col-span-2">
-          <Textarea
-            rows={8}
-            value={reflection}
-            onChange={(e) => setReflection(e.target.value)}
-            placeholder="What stood out? What would I repeat? What would I change?"
-          />
-        </Card>
-        <div className="space-y-4">
-          <Tip n={1} text={tip1} />
-          <Tip n={2} text={tip2} />
-        </div>
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <Tip n={1} text={month.tips[0]} />
+        <Tip n={2} text={month.tips[1]} />
       </div>
+
+      <Card title="Reflection prompts" eyebrow="Two questions for this month" className="mt-6">
+        <div className="space-y-5">
+          <div>
+            <p className="font-display text-base">{month.prompts[0]}</p>
+            <Textarea
+              rows={4}
+              value={promptA}
+              onChange={(e) => setPromptA(e.target.value)}
+              placeholder="Write freely…"
+              className="mt-2"
+            />
+          </div>
+          <div>
+            <p className="font-display text-base">{month.prompts[1]}</p>
+            <Textarea
+              rows={4}
+              value={promptB}
+              onChange={(e) => setPromptB(e.target.value)}
+              placeholder="Write freely…"
+              className="mt-2"
+            />
+          </div>
+        </div>
+      </Card>
+
+      <Card title="Monthly reflection" eyebrow="End-of-month review" className="mt-6">
+        <Textarea
+          rows={8}
+          value={reflection}
+          onChange={(e) => setReflection(e.target.value)}
+          placeholder="What stood out? What would I repeat? What would I change?"
+        />
+      </Card>
     </>
   );
 }
@@ -103,7 +132,7 @@ function Tip({ n, text }: { n: number; text: string }) {
   return (
     <div className="rounded-2xl border bg-brand-soft p-5">
       <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-        Mindset tip {n}
+        Practical tip {n}
       </p>
       <p className="mt-2 font-display text-base leading-snug text-balance">{text}</p>
     </div>

@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/aision/PageHeader";
 import { THEMES, useTheme } from "@/lib/theme";
-import { Check } from "lucide-react";
+import { Check, RotateCcw } from "lucide-react";
 import { useLocalState } from "@/lib/storage";
 import { Input } from "@/components/ui/input";
+import { useAffirmationStyle, defaultStyleForTheme } from "@/lib/affirmation";
+import { getDailyAffirmation } from "@/lib/months";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_app/settings")({
   head: () => ({
@@ -18,6 +21,9 @@ export const Route = createFileRoute("/_app/settings")({
 function Settings() {
   const { theme, setTheme } = useTheme();
   const [name, setName] = useLocalState("aision:settings:name", "");
+  const { style, setStyle, resetToThemeDefault, isOverridden } = useAffirmationStyle(theme);
+  const previewAffirmation = getDailyAffirmation(style);
+  const themeDefault = defaultStyleForTheme(theme);
 
   return (
     <>
@@ -79,6 +85,59 @@ function Settings() {
       </section>
 
       <section className="mt-6 rounded-2xl border bg-card p-6 shadow-elegant">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="font-display text-lg font-medium">Affirmation style</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Choose the tone of your daily affirmations. Soft themes default to{" "}
+              <span className="font-medium text-foreground">Reflective</span>; bold themes default to{" "}
+              <span className="font-medium text-foreground">Action</span>.
+            </p>
+          </div>
+          {isOverridden && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={resetToThemeDefault}
+              className="gap-2 text-xs"
+            >
+              <RotateCcw className="h-3.5 w-3.5" /> Use theme default ({themeDefault})
+            </Button>
+          )}
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <StyleCard
+            id="reflective"
+            label="Reflective"
+            description="Gentle, inward, calming."
+            example="“I trust the quiet space I’m creating.”"
+            active={style === "reflective"}
+            isDefault={themeDefault === "reflective"}
+            onClick={() => setStyle("reflective")}
+          />
+          <StyleCard
+            id="action"
+            label="Action"
+            description="Direct, decisive, energising."
+            example="“I do the work whether I feel like it or not.”"
+            active={style === "action"}
+            isDefault={themeDefault === "action"}
+            onClick={() => setStyle("action")}
+          />
+        </div>
+
+        <div className="mt-5 rounded-xl border bg-brand-soft p-4">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+            Today’s affirmation preview
+          </p>
+          <p className="mt-1 font-display text-base leading-snug text-balance">
+            “{previewAffirmation}”
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-6 rounded-2xl border bg-card p-6 shadow-elegant">
         <h2 className="font-display text-lg font-medium">About</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           AISION 2026 Digital Planner — Powered by{" "}
@@ -86,5 +145,45 @@ function Settings() {
         </p>
       </section>
     </>
+  );
+}
+
+function StyleCard({
+  label,
+  description,
+  example,
+  active,
+  isDefault,
+  onClick,
+}: {
+  id: string;
+  label: string;
+  description: string;
+  example: string;
+  active: boolean;
+  isDefault: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`group relative flex flex-col gap-2 rounded-2xl border p-4 text-left transition-colors ${
+        active ? "border-primary bg-brand-soft" : "hover:bg-muted"
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <p className="font-display text-base font-medium">{label}</p>
+        <div className="flex items-center gap-2">
+          {isDefault && (
+            <span className="rounded-full border bg-surface-elevated px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+              Default
+            </span>
+          )}
+          {active && <Check className="h-4 w-4 text-primary" />}
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground">{description}</p>
+      <p className="mt-1 text-sm italic text-foreground/80">{example}</p>
+    </button>
   );
 }
