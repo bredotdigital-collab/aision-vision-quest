@@ -147,3 +147,43 @@ function Settings() {
     </>
   );
 }
+
+function StyleCard({
+  label,
+  description,
+  example,
+  active,
+  isDefault,
+  onClick,
+}: {
+  id: string;
+  label: string;
+  description: string;
+  example: string;
+  active: boolean;
+  isDefault: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`group relative flex flex-col gap-2 rounded-2xl border p-4 text-left transition-colors ${
+        active ? "border-primary bg-brand-soft" : "hover:bg-muted"
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <p className="font-display text-base font-medium">{label}</p>
+        <div className="flex items-center gap-2">
+          {isDefault && (
+            <span className="rounded-full border bg-surface-elevated px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+              Default
+            </span>
+          )}
+          {active && <Check className="h-4 w-4 text-primary" />}
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground">{description}</p>
+      <p className="mt-1 text-sm italic text-foreground/80">{example}</p>
+    </button>
+  );
+}
