@@ -40,9 +40,11 @@ function Weekly() {
   const [reflection, setReflection] = useLocalState(`aision:weekly:${key}:reflection`, "");
   const [reset, setReset] = useLocalState(`aision:weekly:${key}:reset`, "");
 
+  const month = getMonth();
   return (
     <>
-      <PageHeader eyebrow="This week" title="Weekly planner" description={key} />
+      <PageHeader eyebrow={`${month.name} · ${month.theme}`} title="Weekly planner" description={key} />
+      <MonthThemeBanner />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card title="Weekly priorities">
