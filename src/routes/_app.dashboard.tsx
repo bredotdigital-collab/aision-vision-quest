@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageHeader } from "@/components/aision/PageHeader";
+import { InstallAppCard } from "@/components/aision/InstallAppCard";
 import { ArrowUpRight, CalendarDays, CalendarCheck, Sun, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/_app/dashboard")({
@@ -70,6 +71,10 @@ function Dashboard() {
             Define your 2026 theme on the Year Overview page.
           </p>
         </div>
+      </section>
+
+      <section className="mt-6">
+        <InstallAppCard />
       </section>
     </>
   );
