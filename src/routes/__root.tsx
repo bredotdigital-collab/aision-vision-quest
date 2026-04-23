@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { registerServiceWorker } from "@/lib/pwa";
 
 function NotFoundComponent() {
   return (
@@ -48,11 +50,21 @@ export const Route = createRootRoute({
       { name: "description", content: "AISION Flow is a premium digital 2026 planner web app designed for focus, growth, and consistency." },
       { property: "og:description", content: "AISION Flow is a premium digital 2026 planner web app designed for focus, growth, and consistency." },
       { name: "twitter:description", content: "AISION Flow is a premium digital 2026 planner web app designed for focus, growth, and consistency." },
+      { name: "application-name", content: "AISION Planner" },
+      { name: "apple-mobile-web-app-title", content: "AISION Planner" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "theme-color", content: "#1c1917" },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ecc275e8-d826-4c88-b299-1c5992fc7b62/id-preview-d094cb59--a0575da7-23f4-455b-9f9a-11081c314871.lovable.app-1776571681681.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ecc275e8-d826-4c88-b299-1c5992fc7b62/id-preview-d094cb59--a0575da7-23f4-455b-9f9a-11081c314871.lovable.app-1776571681681.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "icon", href: "/icons/icon-192.png", type: "image/png", sizes: "192x192" },
+      { rel: "icon", href: "/icons/icon-512.png", type: "image/png", sizes: "512x512" },
+      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png", sizes: "180x180" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -86,5 +98,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
   return <Outlet />;
 }
