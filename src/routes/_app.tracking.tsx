@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/aision/PageHeader";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useLocalState } from "@/lib/storage";
+import { formatDateKey, getSavedMood, useLocalState } from "@/lib/storage";
 import { Progress } from "@/components/ui/progress";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/_app/tracking")({
   head: () => ({
