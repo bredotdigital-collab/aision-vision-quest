@@ -15,6 +15,7 @@ import { Route as AppYearRouteImport } from './routes/_app.year'
 import { Route as AppWeeklyRouteImport } from './routes/_app.weekly'
 import { Route as AppTrackingRouteImport } from './routes/_app.tracking'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
+import { Route as AppRemindersRouteImport } from './routes/_app.reminders'
 import { Route as AppMonthlyRouteImport } from './routes/_app.monthly'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppDailyRouteImport } from './routes/_app.daily'
@@ -48,6 +49,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
+const AppRemindersRoute = AppRemindersRouteImport.update({
+  id: '/reminders',
+  path: '/reminders',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMonthlyRoute = AppMonthlyRouteImport.update({
   id: '/monthly',
   path: '/monthly',
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/daily': typeof AppDailyRoute
   '/dashboard': typeof AppDashboardRoute
   '/monthly': typeof AppMonthlyRoute
+  '/reminders': typeof AppRemindersRoute
   '/settings': typeof AppSettingsRoute
   '/tracking': typeof AppTrackingRoute
   '/weekly': typeof AppWeeklyRoute
@@ -79,6 +86,7 @@ export interface FileRoutesByTo {
   '/daily': typeof AppDailyRoute
   '/dashboard': typeof AppDashboardRoute
   '/monthly': typeof AppMonthlyRoute
+  '/reminders': typeof AppRemindersRoute
   '/settings': typeof AppSettingsRoute
   '/tracking': typeof AppTrackingRoute
   '/weekly': typeof AppWeeklyRoute
@@ -91,6 +99,7 @@ export interface FileRoutesById {
   '/_app/daily': typeof AppDailyRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/monthly': typeof AppMonthlyRoute
+  '/_app/reminders': typeof AppRemindersRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/tracking': typeof AppTrackingRoute
   '/_app/weekly': typeof AppWeeklyRoute
@@ -103,6 +112,7 @@ export interface FileRouteTypes {
     | '/daily'
     | '/dashboard'
     | '/monthly'
+    | '/reminders'
     | '/settings'
     | '/tracking'
     | '/weekly'
@@ -113,6 +123,7 @@ export interface FileRouteTypes {
     | '/daily'
     | '/dashboard'
     | '/monthly'
+    | '/reminders'
     | '/settings'
     | '/tracking'
     | '/weekly'
@@ -124,6 +135,7 @@ export interface FileRouteTypes {
     | '/_app/daily'
     | '/_app/dashboard'
     | '/_app/monthly'
+    | '/_app/reminders'
     | '/_app/settings'
     | '/_app/tracking'
     | '/_app/weekly'
@@ -179,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/reminders': {
+      id: '/_app/reminders'
+      path: '/reminders'
+      fullPath: '/reminders'
+      preLoaderRoute: typeof AppRemindersRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/monthly': {
       id: '/_app/monthly'
       path: '/monthly'
@@ -207,6 +226,7 @@ interface AppRouteChildren {
   AppDailyRoute: typeof AppDailyRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppMonthlyRoute: typeof AppMonthlyRoute
+  AppRemindersRoute: typeof AppRemindersRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppTrackingRoute: typeof AppTrackingRoute
   AppWeeklyRoute: typeof AppWeeklyRoute
@@ -217,6 +237,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDailyRoute: AppDailyRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppMonthlyRoute: AppMonthlyRoute,
+  AppRemindersRoute: AppRemindersRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppTrackingRoute: AppTrackingRoute,
   AppWeeklyRoute: AppWeeklyRoute,

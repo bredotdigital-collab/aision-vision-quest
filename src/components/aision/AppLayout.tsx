@@ -6,6 +6,7 @@ import {
   CalendarCheck,
   Sun,
   TrendingUp,
+  Bell,
   Settings as SettingsIcon,
   Menu,
 } from "lucide-react";
@@ -24,6 +25,7 @@ const NAV = [
   { to: "/weekly", label: "Weekly", icon: CalendarCheck },
   { to: "/daily", label: "Daily", icon: Sun },
   { to: "/tracking", label: "Tracking", icon: TrendingUp },
+  { to: "/reminders", label: "Reminders", icon: Bell },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
 ] as const;
 
