@@ -1,7 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PageHeader } from "@/components/aision/PageHeader";
+import { PlannerCard } from "@/components/aision/PlannerCard";
 import { formatDateKey, hasDailyEntries } from "@/lib/storage";
+import { MONTHS as MONTH_DATA } from "@/lib/months";
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/year")({
   head: () => ({
@@ -12,11 +15,6 @@ export const Route = createFileRoute("/_app/year")({
   }),
   component: Year,
 });
-
-const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
 
 function Year() {
   const today = new Date();
@@ -30,27 +28,31 @@ function Year() {
         description="A calm bird’s-eye view of your year."
       />
 
-      <div className="mb-8 rounded-2xl border bg-hero p-6 shadow-elegant">
-        <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+      <PlannerCard tone="hero" className="mb-8">
+        <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground">
           Year theme
         </p>
-        <p className="mt-2 font-display text-2xl">Quiet mastery.</p>
-      </div>
+        <p className="mt-2 font-display text-3xl leading-tight">Quiet mastery.</p>
+        <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+          Twelve themes, one direction — a steady year of focused craft.
+        </p>
+      </PlannerCard>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {MONTHS.map((m, idx) => {
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {MONTH_DATA.map((m, idx) => {
           const active = isCurrentYear && today.getMonth() === idx;
           return (
             <div
-              key={m}
-              className={`rounded-2xl border bg-card p-5 shadow-elegant ${
-                active ? "ring-2 ring-primary" : ""
-              }`}
+              key={m.name}
+              className={cn(
+                "rounded-2xl border bg-card/85 p-5 shadow-elegant transition-colors",
+                active && "border-primary/60 ring-1 ring-primary/30",
+              )}
             >
-              <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-                Month {String(idx + 1).padStart(2, "0")}
+              <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                {String(idx + 1).padStart(2, "0")} · {m.theme}
               </p>
-              <h3 className="mt-1 font-display text-xl">{m}</h3>
+              <h3 className="mt-1 font-display text-xl">{m.name}</h3>
               <MiniMonth year={2026} month={idx} />
             </div>
           );
@@ -96,7 +98,7 @@ function MiniMonth({ year, month }: { year: number; month: number }) {
   return (
     <div className="mt-3 grid grid-cols-7 gap-1 text-[10px]">
       {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-        <div key={i} className="text-center text-muted-foreground">
+        <div key={i} className="text-center font-medium text-muted-foreground/70">
           {d}
         </div>
       ))}
@@ -108,11 +110,12 @@ function MiniMonth({ year, month }: { year: number; month: number }) {
             key={i}
             type="button"
             onClick={() => open(c)}
-            className={`relative flex h-6 items-center justify-center rounded transition-colors ${
+            className={cn(
+              "relative flex h-6 items-center justify-center rounded tabular-nums transition-colors",
               isToday(c)
                 ? "bg-primary text-primary-foreground"
-                : "text-foreground/80 hover:bg-muted"
-            }`}
+                : "text-foreground/80 hover:bg-muted",
+            )}
           >
             {c}
             {entries[c] && !isToday(c) && (
