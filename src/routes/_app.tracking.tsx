@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/aision/PageHeader";
+import { PlannerCard } from "@/components/aision/PlannerCard";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { formatDateKey, getSavedMood, useLocalState } from "@/lib/storage";
 import { Progress } from "@/components/ui/progress";
 import { useEffect, useState } from "react";
@@ -70,13 +72,13 @@ function Tracking() {
     <>
       <PageHeader eyebrow="Progress" title="Tracking" description="Your year, made visible." />
 
-      <Card title="Goal tracker">
-        <ul className="space-y-4">
+      <PlannerCard title="Goal tracker" eyebrow="Long-term progress">
+        <ul className="space-y-5">
           {goals.map((g, i) => {
             const pct = Math.min(100, Math.round((g.current / Math.max(1, g.target)) * 100));
             return (
               <li key={i}>
-                <div className="mb-1 flex items-end justify-between gap-3">
+                <div className="mb-2 flex items-end justify-between gap-3">
                   <Input
                     value={g.name}
                     onChange={(e) =>
@@ -86,7 +88,7 @@ function Tracking() {
                         return n;
                       })
                     }
-                    className="border-0 bg-transparent text-base font-medium shadow-none focus-visible:ring-1"
+                    className="border-0 bg-transparent px-0 text-base font-medium shadow-none focus-visible:ring-1"
                   />
                   <div className="flex items-center gap-2">
                     <Input
@@ -99,7 +101,7 @@ function Tracking() {
                           return n;
                         })
                       }
-                      className="w-24"
+                      className="w-24 tabular-nums"
                     />
                     <span className="text-sm text-muted-foreground">/</span>
                     <Input
@@ -112,21 +114,21 @@ function Tracking() {
                           return n;
                         })
                       }
-                      className="w-24"
+                      className="w-24 tabular-nums"
                     />
                   </div>
                 </div>
                 <Progress value={pct} />
-                <p className="mt-1 text-right text-xs text-muted-foreground">{pct}%</p>
+                <p className="mt-1 text-right text-xs tabular-nums text-muted-foreground">{pct}%</p>
               </li>
             );
           })}
         </ul>
-      </Card>
+      </PlannerCard>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <Card title="Habit streaks">
-          <ul className="space-y-3">
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+        <PlannerCard title="Habit streaks" eyebrow="Consistency">
+          <ul className="space-y-2.5">
             {habits.map((h, i) => (
               <li key={i} className="flex items-center gap-3">
                 <Input
@@ -150,15 +152,15 @@ function Tracking() {
                       return n;
                     })
                   }
-                  className="w-20"
+                  className="w-20 tabular-nums"
                 />
                 <span className="text-xs text-muted-foreground">days</span>
               </li>
             ))}
           </ul>
-        </Card>
+        </PlannerCard>
 
-        <Card title="Mood trend" eyebrow="Last 14 days · from your daily entries">
+        <PlannerCard title="Mood trend" eyebrow="Last 14 days · from your daily entries">
           <div className="flex h-32 items-end gap-1.5">
             {moodHistory.map((m) => {
               const v = m.value;
@@ -189,16 +191,14 @@ function Tracking() {
           <p className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
             <span>{moodLoggedDays}/14 days logged</span>
             <span>
-              {moodAvg != null
-                ? `Avg ${moodAvg.toFixed(1)}/4`
-                : "Log a mood on your daily page"}
+              {moodAvg != null ? `Avg ${moodAvg.toFixed(1)}/4` : "Log a mood on your daily page"}
             </span>
           </p>
-        </Card>
+        </PlannerCard>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <Card title="Weight tracker">
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+        <PlannerCard title="Weight tracker" eyebrow="Last 30 entries">
           <div className="flex gap-2">
             <Input
               type="number"
@@ -208,61 +208,35 @@ function Tracking() {
               placeholder="Today’s weight"
               onKeyDown={(e) => e.key === "Enter" && addWeight()}
             />
-            <button
-              onClick={addWeight}
-              className="rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
-            >
+            <Button onClick={addWeight} className="px-5">
               Log
-            </button>
+            </Button>
           </div>
           <ul className="mt-4 max-h-48 space-y-1 overflow-auto text-sm">
             {weights.length === 0 && (
-              <li className="text-muted-foreground">No entries yet.</li>
+              <li className="rounded-lg border border-dashed py-6 text-center text-muted-foreground">
+                No entries yet.
+              </li>
             )}
             {[...weights].reverse().map((w, i) => (
-              <li key={i} className="flex justify-between border-b py-1">
+              <li key={i} className="flex justify-between border-b border-border/50 py-1.5">
                 <span className="text-muted-foreground">{w.date}</span>
-                <span className="font-medium">{w.value}</span>
+                <span className="font-medium tabular-nums">{w.value}</span>
               </li>
             ))}
           </ul>
-        </Card>
+        </PlannerCard>
 
-        <Card title="Wellness progress">
+        <PlannerCard title="Wellness progress" eyebrow="Notes">
           <Textarea
             rows={8}
             value={wellness}
             onChange={(e) => setWellness(e.target.value)}
             placeholder="Sleep, energy, stress, body — what are you noticing?"
+            className="resize-none border-0 bg-surface/50 p-4 text-sm shadow-none focus-visible:ring-1"
           />
-        </Card>
+        </PlannerCard>
       </div>
     </>
-  );
-}
-
-function Card({
-  title,
-  eyebrow,
-  className = "",
-  children,
-}: {
-  title: string;
-  eyebrow?: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className={`rounded-2xl border bg-card p-6 shadow-elegant ${className}`}>
-      <header className="mb-4">
-        {eyebrow && (
-          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-            {eyebrow}
-          </p>
-        )}
-        <h2 className="font-display text-lg font-medium">{title}</h2>
-      </header>
-      {children}
-    </section>
   );
 }
