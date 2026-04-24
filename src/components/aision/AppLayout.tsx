@@ -12,6 +12,8 @@ import {
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { ReminderToaster } from "./ReminderToaster";
+import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -110,6 +112,8 @@ export function AppLayout() {
           Powered by <span className="font-medium text-foreground">AISION Creative Systems</span>
         </footer>
       </div>
+      <Toaster />
+      <ReminderToaster />
     </div>
   );
 }
