@@ -6,12 +6,15 @@ import {
   CalendarCheck,
   Sun,
   TrendingUp,
+  Bell,
   Settings as SettingsIcon,
   Menu,
 } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { ReminderToaster } from "./ReminderToaster";
+import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +25,7 @@ const NAV = [
   { to: "/weekly", label: "Weekly", icon: CalendarCheck },
   { to: "/daily", label: "Daily", icon: Sun },
   { to: "/tracking", label: "Tracking", icon: TrendingUp },
+  { to: "/reminders", label: "Reminders", icon: Bell },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
 ] as const;
 
@@ -110,6 +114,8 @@ export function AppLayout() {
           Powered by <span className="font-medium text-foreground">AISION Creative Systems</span>
         </footer>
       </div>
+      <Toaster />
+      <ReminderToaster />
     </div>
   );
 }
