@@ -158,24 +158,42 @@ function Tracking() {
           </ul>
         </Card>
 
-        <Card title="Mood trend" eyebrow="Last 14 days">
+        <Card title="Mood trend" eyebrow="Last 14 days · from your daily entries">
           <div className="flex h-32 items-end gap-1.5">
-            {moods.map((m, i) => (
-              <button
-                key={i}
-                onClick={() =>
-                  setMoods((prev) => {
-                    const n = [...prev];
-                    n[i] = ((n[i] ?? 0) + 1) % 5;
-                    return n;
-                  })
-                }
-                className="flex-1 rounded-sm bg-primary/80 transition-all hover:bg-primary"
-                style={{ height: `${20 + ((m ?? 0) / 4) * 80}%` }}
-                aria-label={`Day ${i + 1} mood`}
-              />
-            ))}
+            {moodHistory.map((m) => {
+              const v = m.value;
+              const isToday = m.date === formatDateKey(new Date());
+              return (
+                <div
+                  key={m.date}
+                  className="group/bar flex flex-1 flex-col items-center gap-1"
+                  title={v != null ? `${m.date} · mood ${v + 1}/5` : `${m.date} · no entry`}
+                >
+                  <div className="relative flex h-24 w-full items-end">
+                    {v != null ? (
+                      <div
+                        className={`w-full rounded-sm transition-all ${
+                          isToday ? "bg-primary" : "bg-primary/70 group-hover/bar:bg-primary"
+                        }`}
+                        style={{ height: `${20 + (v / 4) * 80}%` }}
+                      />
+                    ) : (
+                      <div className="h-1 w-full rounded-sm border border-dashed border-muted-foreground/30" />
+                    )}
+                  </div>
+                  <span className="text-[9px] uppercase text-muted-foreground/60">{m.label}</span>
+                </div>
+              );
+            })}
           </div>
+          <p className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+            <span>{moodLoggedDays}/14 days logged</span>
+            <span>
+              {moodAvg != null
+                ? `Avg ${moodAvg.toFixed(1)}/4`
+                : "Log a mood on your daily page"}
+            </span>
+          </p>
         </Card>
       </div>
 
