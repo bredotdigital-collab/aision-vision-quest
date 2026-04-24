@@ -33,10 +33,27 @@ function Tracking() {
       { name: "Movement", streak: 0 },
     ],
   );
-  const [moods, setMoods] = useLocalState<number[]>(
-    "aision:tracking:mood",
-    Array.from({ length: 14 }, () => 2 + Math.round(Math.random() * 2)),
-  );
+  const [moodHistory, setMoodHistory] = useState<{ date: string; label: string; value: number | null }[]>([]);
+  useEffect(() => {
+    const today = new Date();
+    const arr: { date: string; label: string; value: number | null }[] = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+      const key = formatDateKey(d);
+      arr.push({
+        date: key,
+        label: d.toLocaleDateString(undefined, { weekday: "short" }).slice(0, 1),
+        value: getSavedMood(key),
+      });
+    }
+    setMoodHistory(arr);
+  }, []);
+  const moodAvg = (() => {
+    const vals = moodHistory.map((m) => m.value).filter((v): v is number => v != null);
+    if (!vals.length) return null;
+    return vals.reduce((a, b) => a + b, 0) / vals.length;
+  })();
+  const moodLoggedDays = moodHistory.filter((m) => m.value != null).length;
   const [weights, setWeights] = useLocalState<Weight[]>("aision:tracking:weights", []);
   const [draftWeight, setDraftWeight] = useLocalState("aision:tracking:weightDraft", "");
   const [wellness, setWellness] = useLocalState("aision:tracking:wellness", "");
