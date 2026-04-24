@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PageHeader } from "@/components/aision/PageHeader";
+import { PlannerCard } from "@/components/aision/PlannerCard";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDateKey, hasDailyEntries, useLocalState } from "@/lib/storage";
 import { Input } from "@/components/ui/input";
@@ -47,10 +48,9 @@ function Monthly() {
     "",
   );
 
-  // Build calendar grid (Mon-first)
   const cells = useMemo(() => {
     const first = new Date(year, monthIdx, 1);
-    const startDay = (first.getDay() + 6) % 7; // Mon = 0
+    const startDay = (first.getDay() + 6) % 7;
     const daysIn = new Date(year, monthIdx + 1, 0).getDate();
     const arr: (number | null)[] = [
       ...Array(startDay).fill(null),
@@ -60,7 +60,6 @@ function Monthly() {
     return arr;
   }, [year, monthIdx]);
 
-  // Track which days have saved entries (re-check whenever month changes)
   const [entriesMap, setEntriesMap] = useState<Record<number, boolean>>({});
   useEffect(() => {
     const m: Record<number, boolean> = {};
@@ -81,8 +80,7 @@ function Monthly() {
     navigate({ to: "/daily", search: key === todayKey ? {} : { d: key } });
   };
 
-  const shiftMonth = (delta: number) =>
-    setCursor(new Date(year, monthIdx + delta, 1));
+  const shiftMonth = (delta: number) => setCursor(new Date(year, monthIdx + delta, 1));
 
   return (
     <>
@@ -110,33 +108,29 @@ function Monthly() {
         }
       />
 
-      <section className="mb-6 grid gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border bg-hero p-6 shadow-elegant lg:col-span-2">
-          <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
+      <section className="mb-5 grid gap-5 lg:grid-cols-3">
+        <PlannerCard tone="hero" className="lg:col-span-2">
+          <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground">
             Theme of the month
           </p>
-          <h2 className="mt-1 font-display text-3xl font-semibold">{month.theme}</h2>
-          <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+          <h2 className="mt-2 font-display text-3xl font-semibold leading-tight">{month.theme}</h2>
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
             <span className="font-medium text-foreground">Focus · </span>
             {month.focus}
           </p>
-        </div>
-        <div className="rounded-2xl border bg-card p-6 shadow-elegant">
-          <p className="text-[11px] uppercase tracking-[0.24em] text-muted-foreground">
-            Personal intention
-          </p>
+        </PlannerCard>
+        <PlannerCard title="Personal intention" eyebrow="Your word">
           <Input
             value={intention}
             onChange={(e) => setIntention(e.target.value)}
-            placeholder="Add your own word for the month…"
-            className="mt-2 border-0 bg-transparent text-lg shadow-none focus-visible:ring-1"
+            placeholder="Add your own word…"
+            className="border-0 bg-surface/60 px-4 text-base shadow-none focus-visible:ring-1"
           />
-        </div>
+        </PlannerCard>
       </section>
 
-      {/* Interactive calendar grid */}
-      <Card title="Calendar" eyebrow="Tap a day to plan it" className="mb-6">
-        <div className="mb-2 grid grid-cols-7 gap-2 text-center text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+      <PlannerCard title="Calendar" eyebrow="Tap a day to plan it" className="mb-5">
+        <div className="mb-3 grid grid-cols-7 gap-2 text-center text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
           {WEEKDAYS.map((d) => (
             <div key={d}>{d}</div>
           ))}
@@ -185,7 +179,7 @@ function Monthly() {
             );
           })}
         </div>
-        <p className="mt-4 flex items-center gap-3 text-[11px] text-muted-foreground">
+        <p className="mt-4 flex flex-wrap items-center gap-4 text-[11px] text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-primary" /> Has entries
           </span>
@@ -193,9 +187,9 @@ function Monthly() {
             <span className="h-2 w-2 rounded-sm border border-primary/60 bg-brand-soft" /> Today
           </span>
         </p>
-      </Card>
+      </PlannerCard>
 
-      <Card title="Monthly goals">
+      <PlannerCard title="Monthly goals" eyebrow="Up to four">
         <div className="grid gap-3 sm:grid-cols-2">
           {goals.map((g, i) => (
             <Input
@@ -212,14 +206,14 @@ function Monthly() {
             />
           ))}
         </div>
-      </Card>
+      </PlannerCard>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div className="mt-5 grid gap-5 sm:grid-cols-2">
         <Tip n={1} text={month.tips[0]} />
         <Tip n={2} text={month.tips[1]} />
       </div>
 
-      <Card title="Reflection prompts" eyebrow="Two questions for this month" className="mt-6">
+      <PlannerCard title="Reflection prompts" eyebrow="Two questions" className="mt-5">
         <div className="space-y-5">
           <div>
             <p className="font-display text-base">{month.prompts[0]}</p>
@@ -228,7 +222,7 @@ function Monthly() {
               value={promptA}
               onChange={(e) => setPromptA(e.target.value)}
               placeholder="Write freely…"
-              className="mt-2"
+              className="mt-2 resize-none border-0 bg-surface/50 p-4 text-sm shadow-none focus-visible:ring-1"
             />
           </div>
           <div>
@@ -238,57 +232,32 @@ function Monthly() {
               value={promptB}
               onChange={(e) => setPromptB(e.target.value)}
               placeholder="Write freely…"
-              className="mt-2"
+              className="mt-2 resize-none border-0 bg-surface/50 p-4 text-sm shadow-none focus-visible:ring-1"
             />
           </div>
         </div>
-      </Card>
+      </PlannerCard>
 
-      <Card title="Monthly reflection" eyebrow="End-of-month review" className="mt-6">
+      <PlannerCard title="Monthly reflection" eyebrow="End-of-month review" className="mt-5">
         <Textarea
           rows={8}
           value={reflection}
           onChange={(e) => setReflection(e.target.value)}
           placeholder="What stood out? What would I repeat? What would I change?"
+          className="resize-none border-0 bg-surface/50 p-4 text-sm shadow-none focus-visible:ring-1"
         />
-      </Card>
+      </PlannerCard>
     </>
   );
 }
 
 function Tip({ n, text }: { n: number; text: string }) {
   return (
-    <div className="rounded-2xl border bg-brand-soft p-5">
-      <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+    <div className="rounded-2xl border bg-brand-soft/70 p-6 shadow-elegant">
+      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
         Practical tip {n}
       </p>
       <p className="mt-2 font-display text-base leading-snug text-balance">{text}</p>
     </div>
-  );
-}
-
-function Card({
-  title,
-  eyebrow,
-  className = "",
-  children,
-}: {
-  title: string;
-  eyebrow?: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className={`rounded-2xl border bg-card p-6 shadow-elegant ${className}`}>
-      <header className="mb-4">
-        {eyebrow && (
-          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-            {eyebrow}
-          </p>
-        )}
-        <h2 className="font-display text-lg font-medium">{title}</h2>
-      </header>
-      {children}
-    </section>
   );
 }

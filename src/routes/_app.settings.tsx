@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/aision/PageHeader";
+import { PlannerCard } from "@/components/aision/PlannerCard";
 import { THEMES, useTheme } from "@/lib/theme";
 import { Check, RotateCcw } from "lucide-react";
 import { useLocalState } from "@/lib/storage";
@@ -7,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useAffirmationStyle, defaultStyleForTheme } from "@/lib/affirmation";
 import { getDailyAffirmation } from "@/lib/months";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/settings")({
   head: () => ({
@@ -27,37 +29,42 @@ function Settings() {
 
   return (
     <>
-      <PageHeader eyebrow="Settings" title="Make it yours" />
+      <PageHeader
+        eyebrow="Settings"
+        title="Make it yours"
+        description="Personalise the planner to match how you think and work."
+      />
 
-      <section className="rounded-2xl border bg-card p-6 shadow-elegant">
-        <h2 className="font-display text-lg font-medium">Your name</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Used for personalised greetings throughout the planner.
-        </p>
+      <PlannerCard
+        title="Your name"
+        eyebrow="Identity"
+        description="Used for personalised greetings throughout the planner."
+      >
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Alex"
-          className="mt-4 max-w-sm"
+          className="max-w-sm"
         />
-      </section>
+      </PlannerCard>
 
-      <section className="mt-6 rounded-2xl border bg-card p-6 shadow-elegant">
-        <h2 className="font-display text-lg font-medium">Theme</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Choose the aesthetic that helps you feel most yourself.
-        </p>
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+      <PlannerCard
+        title="Theme"
+        eyebrow="Aesthetic"
+        description="Choose the aesthetic that helps you feel most yourself."
+        className="mt-5"
+      >
+        <div className="grid gap-3 sm:grid-cols-2">
           {THEMES.map((t) => {
             const active = t.id === theme;
             return (
               <button
                 key={t.id}
                 onClick={() => setTheme(t.id)}
-                className={`group relative flex items-start gap-4 rounded-2xl border p-4 text-left transition-colors ${
-                  active ? "border-primary bg-brand-soft" : "hover:bg-muted"
-                }`}
+                className={cn(
+                  "group relative flex items-start gap-4 rounded-2xl border p-4 text-left transition-colors",
+                  active ? "border-primary bg-brand-soft" : "hover:bg-muted/60",
+                )}
               >
                 <div className="flex shrink-0 -space-x-2" data-theme={t.id}>
                   <span
@@ -82,31 +89,22 @@ function Settings() {
             );
           })}
         </div>
-      </section>
+      </PlannerCard>
 
-      <section className="mt-6 rounded-2xl border bg-card p-6 shadow-elegant">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 className="font-display text-lg font-medium">Affirmation style</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Choose the tone of your daily affirmations. Soft themes default to{" "}
-              <span className="font-medium text-foreground">Reflective</span>; bold themes default to{" "}
-              <span className="font-medium text-foreground">Action</span>.
-            </p>
-          </div>
-          {isOverridden && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={resetToThemeDefault}
-              className="gap-2 text-xs"
-            >
-              <RotateCcw className="h-3.5 w-3.5" /> Use theme default ({themeDefault})
+      <PlannerCard
+        eyebrow="Voice"
+        title="Affirmation style"
+        description="Choose the tone of your daily affirmations. Soft themes default to Reflective; bold themes default to Action."
+        action={
+          isOverridden && (
+            <Button variant="ghost" size="sm" onClick={resetToThemeDefault} className="gap-2 text-xs">
+              <RotateCcw className="h-3.5 w-3.5" /> Reset to {themeDefault}
             </Button>
-          )}
-        </div>
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          )
+        }
+        className="mt-5"
+      >
+        <div className="grid gap-3 sm:grid-cols-2">
           <StyleCard
             id="reflective"
             label="Reflective"
@@ -127,23 +125,22 @@ function Settings() {
           />
         </div>
 
-        <div className="mt-5 rounded-xl border bg-brand-soft p-4">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+        <div className="mt-5 rounded-xl border bg-brand-soft/70 p-4">
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
             Today’s affirmation preview
           </p>
           <p className="mt-1 font-display text-base leading-snug text-balance">
             “{previewAffirmation}”
           </p>
         </div>
-      </section>
+      </PlannerCard>
 
-      <section className="mt-6 rounded-2xl border bg-card p-6 shadow-elegant">
-        <h2 className="font-display text-lg font-medium">About</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
+      <PlannerCard title="About" eyebrow="AISION" className="mt-5">
+        <p className="text-sm text-muted-foreground">
           AISION 2026 Digital Planner — Powered by{" "}
           <span className="font-medium text-foreground">AISION Creative Systems</span>.
         </p>
-      </section>
+      </PlannerCard>
     </>
   );
 }
@@ -167,9 +164,10 @@ function StyleCard({
   return (
     <button
       onClick={onClick}
-      className={`group relative flex flex-col gap-2 rounded-2xl border p-4 text-left transition-colors ${
-        active ? "border-primary bg-brand-soft" : "hover:bg-muted"
-      }`}
+      className={cn(
+        "group relative flex flex-col gap-2 rounded-2xl border p-4 text-left transition-colors",
+        active ? "border-primary bg-brand-soft" : "hover:bg-muted/60",
+      )}
     >
       <div className="flex items-center justify-between">
         <p className="font-display text-base font-medium">{label}</p>
