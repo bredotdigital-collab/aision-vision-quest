@@ -17,7 +17,7 @@ export function PlannerCard({
   eyebrow?: string;
   description?: string;
   action?: ReactNode;
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   contentClassName?: string;
   tone?: Tone;
