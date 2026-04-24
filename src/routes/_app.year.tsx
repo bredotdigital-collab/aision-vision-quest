@@ -1,5 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PageHeader } from "@/components/aision/PageHeader";
+import { formatDateKey, hasDailyEntries } from "@/lib/storage";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/_app/year")({
   head: () => ({
@@ -59,8 +61,9 @@ function Year() {
 }
 
 function MiniMonth({ year, month }: { year: number; month: number }) {
+  const navigate = useNavigate();
   const first = new Date(year, month, 1);
-  const startDay = (first.getDay() + 6) % 7; // Mon = 0
+  const startDay = (first.getDay() + 6) % 7;
   const daysIn = new Date(year, month + 1, 0).getDate();
   const cells: (number | null)[] = [
     ...Array(startDay).fill(null),
@@ -69,8 +72,26 @@ function MiniMonth({ year, month }: { year: number; month: number }) {
   while (cells.length % 7 !== 0) cells.push(null);
 
   const today = new Date();
+  const todayKey = formatDateKey(today);
   const isToday = (d: number) =>
     today.getFullYear() === year && today.getMonth() === month && today.getDate() === d;
+
+  const [entries, setEntries] = useState<Record<number, boolean>>({});
+  useEffect(() => {
+    const m: Record<number, boolean> = {};
+    for (const c of cells) {
+      if (c == null) continue;
+      const key = `${year}-${String(month + 1).padStart(2, "0")}-${String(c).padStart(2, "0")}`;
+      if (hasDailyEntries(key)) m[c] = true;
+    }
+    setEntries(m);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [year, month]);
+
+  const open = (d: number) => {
+    const key = formatDateKey(new Date(year, month, d));
+    navigate({ to: "/daily", search: key === todayKey ? {} : { d: key } });
+  };
 
   return (
     <div className="mt-3 grid grid-cols-7 gap-1 text-[10px]">
@@ -79,20 +100,27 @@ function MiniMonth({ year, month }: { year: number; month: number }) {
           {d}
         </div>
       ))}
-      {cells.map((c, i) => (
-        <div
-          key={i}
-          className={`flex h-6 items-center justify-center rounded ${
-            c == null
-              ? ""
-              : isToday(c)
+      {cells.map((c, i) =>
+        c == null ? (
+          <div key={i} className="h-6" />
+        ) : (
+          <button
+            key={i}
+            type="button"
+            onClick={() => open(c)}
+            className={`relative flex h-6 items-center justify-center rounded transition-colors ${
+              isToday(c)
                 ? "bg-primary text-primary-foreground"
                 : "text-foreground/80 hover:bg-muted"
-          }`}
-        >
-          {c ?? ""}
-        </div>
-      ))}
+            }`}
+          >
+            {c}
+            {entries[c] && !isToday(c) && (
+              <span className="absolute bottom-0.5 h-1 w-1 rounded-full bg-primary" />
+            )}
+          </button>
+        ),
+      )}
     </div>
   );
 }

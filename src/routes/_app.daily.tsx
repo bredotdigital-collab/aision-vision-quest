@@ -1,17 +1,36 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { PageHeader } from "@/components/aision/PageHeader";
 import { PlannerCard } from "@/components/aision/PlannerCard";
-import { useLocalState } from "@/lib/storage";
+import { formatDateKey, parseDateKey, useLocalState } from "@/lib/storage";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Droplet, Footprints, Heart, Sparkles, Plus, X, Quote } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Droplet,
+  Footprints,
+  Heart,
+  Sparkles,
+  Plus,
+  Quote,
+  X,
+  CalendarDays,
+} from "lucide-react";
 import { getDailyAffirmation, getMonth } from "@/lib/months";
 import { useAffirmationStyle } from "@/lib/affirmation";
 import { useTheme } from "@/lib/theme";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+
+type DailySearch = { d?: string };
 
 export const Route = createFileRoute("/_app/daily")({
+  validateSearch: (s: Record<string, unknown>): DailySearch => ({
+    d: typeof s.d === "string" ? s.d : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Daily Planner · AISION" },
@@ -21,7 +40,7 @@ export const Route = createFileRoute("/_app/daily")({
   component: Daily,
 });
 
-const HOURS = Array.from({ length: 17 }, (_, i) => 6 + i); // 6..22
+const HOURS = Array.from({ length: 17 }, (_, i) => 6 + i);
 const HABITS = [
   { id: "selfcare", label: "Self-care", icon: Sparkles },
   { id: "movement", label: "Movement", icon: Footprints },
@@ -30,48 +49,59 @@ const HABITS = [
 const MOODS = ["😔", "😐", "🙂", "😊", "✨"];
 const MOOD_LABELS = ["Low", "Off", "Steady", "Good", "Radiant"];
 
-function todayKey() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+function shiftDate(key: string, days: number): string {
+  const d = parseDateKey(key);
+  d.setDate(d.getDate() + days);
+  return formatDateKey(d);
 }
 
 function Daily() {
-  const key = todayKey();
-  const [priorities, setPriorities] = useLocalState<string[]>(`aision:daily:${key}:priorities`, [
-    "",
-    "",
-    "",
-  ]);
+  const search = Route.useSearch();
+  const navigate = useNavigate();
+  const todayKey = formatDateKey(new Date());
+  const dateKey = search.d ?? todayKey;
+  const date = parseDateKey(dateKey);
+
+  const [priorities, setPriorities] = useLocalState<string[]>(
+    `aision:daily:${dateKey}:priorities`,
+    ["", "", ""],
+  );
   const [schedule, setSchedule] = useLocalState<Record<string, string>>(
-    `aision:daily:${key}:schedule`,
+    `aision:daily:${dateKey}:schedule`,
     {},
   );
   const [tasks, setTasks] = useLocalState<{ text: string; done: boolean }[]>(
-    `aision:daily:${key}:tasks`,
+    `aision:daily:${dateKey}:tasks`,
     [],
   );
-  const [taskDraft, setTaskDraft] = useLocalState<string>(`aision:daily:${key}:taskDraft`, "");
-  const [notes, setNotes] = useLocalState<string>(`aision:daily:${key}:notes`, "");
-  const [achieved, setAchieved] = useLocalState<string>(`aision:daily:${key}:achieved`, "");
-  const [mood, setMood] = useLocalState<number>(`aision:daily:${key}:mood`, -1);
-  const [water, setWater] = useLocalState<number>(`aision:daily:${key}:water`, 0);
+  const [taskDraft, setTaskDraft] = useLocalState<string>(
+    `aision:daily:${dateKey}:taskDraft`,
+    "",
+  );
+  const [notes, setNotes] = useLocalState<string>(`aision:daily:${dateKey}:notes`, "");
+  const [achieved, setAchieved] = useLocalState<string>(`aision:daily:${dateKey}:achieved`, "");
+  const [mood, setMood] = useLocalState<number>(`aision:daily:${dateKey}:mood`, -1);
+  const [water, setWater] = useLocalState<number>(`aision:daily:${dateKey}:water`, 0);
   const [trackers, setTrackers] = useLocalState<Record<string, boolean>>(
-    `aision:daily:${key}:trackers`,
+    `aision:daily:${dateKey}:trackers`,
     {},
   );
 
-  const today = new Date();
-  const weekday = today.toLocaleDateString(undefined, { weekday: "long" });
-  const dateLabel = today.toLocaleDateString(undefined, {
+  const weekday = date.toLocaleDateString(undefined, { weekday: "long" });
+  const dateLabel = date.toLocaleDateString(undefined, {
     month: "long",
     day: "numeric",
     year: "numeric",
   });
+  const isToday = dateKey === todayKey;
   const { theme } = useTheme();
   const { style } = useAffirmationStyle(theme);
-  const affirmation = getDailyAffirmation(style, today);
-  const month = getMonth(today);
+  const affirmation = getDailyAffirmation(style, date);
+  const month = getMonth(date);
   const completedTasks = tasks.filter((t) => t.done).length;
+
+  const goToDate = (key: string) =>
+    navigate({ to: "/daily", search: key === todayKey ? {} : { d: key } });
 
   const addTask = () => {
     const t = taskDraft.trim();
@@ -85,16 +115,64 @@ function Daily() {
       <PageHeader
         eyebrow={`${month.name} · ${month.theme}`}
         title={weekday}
-        description={dateLabel}
+        description={`${dateLabel}${isToday ? " · Today" : ""}`}
+        actions={
+          <div className="flex items-center gap-1 rounded-xl border bg-card/60 p-1 shadow-elegant">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+              onClick={() => goToDate(shiftDate(dateKey, -1))}
+              aria-label="Previous day"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 gap-2 px-3 font-medium">
+                  <CalendarDays className="h-4 w-4" />
+                  {date.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(d) => d && goToDate(formatDateKey(d))}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+              onClick={() => goToDate(shiftDate(dateKey, 1))}
+              aria-label="Next day"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            {!isToday && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-xs text-muted-foreground"
+                onClick={() => goToDate(todayKey)}
+              >
+                Today
+              </Button>
+            )}
+          </div>
+        }
       />
 
-      {/* Affirmation — single hero element */}
       <section className="mb-8 overflow-hidden rounded-2xl border bg-hero p-8 shadow-elegant sm:p-10">
         <div className="flex items-start gap-4">
           <Quote className="h-5 w-5 shrink-0 text-primary/60" strokeWidth={1.5} />
           <div className="min-w-0">
             <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-muted-foreground">
-              Today's affirmation · {style === "action" ? "Action" : "Reflective"}
+              {isToday ? "Today's affirmation" : "Affirmation"} · {style === "action" ? "Action" : "Reflective"}
             </p>
             <p className="mt-3 font-display text-2xl leading-snug text-balance sm:text-3xl">
               {affirmation}
@@ -104,7 +182,6 @@ function Daily() {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-12">
-        {/* LEFT — focus column */}
         <div className="space-y-6 lg:col-span-8">
           <PlannerCard title="Top 3 priorities" eyebrow="Move the needle">
             <div className="space-y-3">
@@ -246,30 +323,38 @@ function Daily() {
           </PlannerCard>
         </div>
 
-        {/* RIGHT — wellness column */}
         <div className="space-y-6 lg:col-span-4">
           <PlannerCard title="Mood" eyebrow="How am I?">
             <div className="flex items-center justify-between gap-1">
-              {MOODS.map((m, i) => (
-                <button
-                  key={i}
-                  onClick={() => setMood(i)}
-                  className={`flex h-11 w-11 items-center justify-center rounded-full text-xl transition-all ${
-                    mood === i
-                      ? "scale-110 bg-brand-soft ring-2 ring-primary/40"
-                      : "opacity-50 hover:opacity-100"
-                  }`}
-                  aria-label={MOOD_LABELS[i]}
-                >
-                  {m}
-                </button>
-              ))}
+              {MOODS.map((m, i) => {
+                const active = mood === i;
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setMood(active ? -1 : i)}
+                    className={cn(
+                      "flex h-12 w-12 items-center justify-center rounded-full text-2xl transition-all",
+                      active
+                        ? "scale-110 bg-brand-soft shadow-elegant ring-2 ring-primary/50"
+                        : "opacity-50 hover:scale-105 hover:opacity-100",
+                    )}
+                    aria-pressed={active}
+                    aria-label={MOOD_LABELS[i]}
+                  >
+                    {m}
+                  </button>
+                );
+              })}
             </div>
-            {mood >= 0 && (
-              <p className="mt-3 text-center text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                {MOOD_LABELS[mood]}
-              </p>
-            )}
+            <p
+              className={cn(
+                "mt-3 text-center text-xs uppercase tracking-[0.18em] transition-colors",
+                mood >= 0 ? "text-foreground" : "text-muted-foreground/50",
+              )}
+            >
+              {mood >= 0 ? MOOD_LABELS[mood] : "Tap to log"}
+            </p>
           </PlannerCard>
 
           <PlannerCard
@@ -341,6 +426,13 @@ function Daily() {
               className="resize-none border-0 bg-surface/50 p-4 text-sm shadow-none focus-visible:ring-1"
             />
           </PlannerCard>
+
+          <div className="rounded-xl border bg-card/60 p-4 text-center text-xs text-muted-foreground">
+            Looking for another day?{" "}
+            <Link to="/monthly" className="font-medium text-foreground underline-offset-2 hover:underline">
+              Open monthly view
+            </Link>
+          </div>
         </div>
       </div>
     </>

@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/aision/PageHeader";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useLocalState } from "@/lib/storage";
+import { formatDateKey, getSavedMood, useLocalState } from "@/lib/storage";
 import { Progress } from "@/components/ui/progress";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/_app/tracking")({
   head: () => ({
@@ -32,10 +33,27 @@ function Tracking() {
       { name: "Movement", streak: 0 },
     ],
   );
-  const [moods, setMoods] = useLocalState<number[]>(
-    "aision:tracking:mood",
-    Array.from({ length: 14 }, () => 2 + Math.round(Math.random() * 2)),
-  );
+  const [moodHistory, setMoodHistory] = useState<{ date: string; label: string; value: number | null }[]>([]);
+  useEffect(() => {
+    const today = new Date();
+    const arr: { date: string; label: string; value: number | null }[] = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+      const key = formatDateKey(d);
+      arr.push({
+        date: key,
+        label: d.toLocaleDateString(undefined, { weekday: "short" }).slice(0, 1),
+        value: getSavedMood(key),
+      });
+    }
+    setMoodHistory(arr);
+  }, []);
+  const moodAvg = (() => {
+    const vals = moodHistory.map((m) => m.value).filter((v): v is number => v != null);
+    if (!vals.length) return null;
+    return vals.reduce((a, b) => a + b, 0) / vals.length;
+  })();
+  const moodLoggedDays = moodHistory.filter((m) => m.value != null).length;
   const [weights, setWeights] = useLocalState<Weight[]>("aision:tracking:weights", []);
   const [draftWeight, setDraftWeight] = useLocalState("aision:tracking:weightDraft", "");
   const [wellness, setWellness] = useLocalState("aision:tracking:wellness", "");
@@ -140,24 +158,42 @@ function Tracking() {
           </ul>
         </Card>
 
-        <Card title="Mood trend" eyebrow="Last 14 days">
+        <Card title="Mood trend" eyebrow="Last 14 days · from your daily entries">
           <div className="flex h-32 items-end gap-1.5">
-            {moods.map((m, i) => (
-              <button
-                key={i}
-                onClick={() =>
-                  setMoods((prev) => {
-                    const n = [...prev];
-                    n[i] = ((n[i] ?? 0) + 1) % 5;
-                    return n;
-                  })
-                }
-                className="flex-1 rounded-sm bg-primary/80 transition-all hover:bg-primary"
-                style={{ height: `${20 + ((m ?? 0) / 4) * 80}%` }}
-                aria-label={`Day ${i + 1} mood`}
-              />
-            ))}
+            {moodHistory.map((m) => {
+              const v = m.value;
+              const isToday = m.date === formatDateKey(new Date());
+              return (
+                <div
+                  key={m.date}
+                  className="group/bar flex flex-1 flex-col items-center gap-1"
+                  title={v != null ? `${m.date} · mood ${v + 1}/5` : `${m.date} · no entry`}
+                >
+                  <div className="relative flex h-24 w-full items-end">
+                    {v != null ? (
+                      <div
+                        className={`w-full rounded-sm transition-all ${
+                          isToday ? "bg-primary" : "bg-primary/70 group-hover/bar:bg-primary"
+                        }`}
+                        style={{ height: `${20 + (v / 4) * 80}%` }}
+                      />
+                    ) : (
+                      <div className="h-1 w-full rounded-sm border border-dashed border-muted-foreground/30" />
+                    )}
+                  </div>
+                  <span className="text-[9px] uppercase text-muted-foreground/60">{m.label}</span>
+                </div>
+              );
+            })}
           </div>
+          <p className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+            <span>{moodLoggedDays}/14 days logged</span>
+            <span>
+              {moodAvg != null
+                ? `Avg ${moodAvg.toFixed(1)}/4`
+                : "Log a mood on your daily page"}
+            </span>
+          </p>
         </Card>
       </div>
 
